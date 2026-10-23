@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
         webView = PokeBonkWebView(this)
 
-        val root = FrameLayout(this).apply {
+        val root = AspectRatioFrameLayout(this).apply {
             setBackgroundColor(android.graphics.Color.BLACK)
             addView(
                 webView,
