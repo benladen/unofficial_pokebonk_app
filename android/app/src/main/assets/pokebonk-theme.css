@@ -608,6 +608,10 @@ body.pb-has-titlebar:not(.pb-in-fullscreen) #pb-core-hud {
 }
 
 /* In-Game Top Banners & Headers */
+#pb-core-hud {
+  display: none !important;
+}
+
 .banner,
 .mm-top,
 .top-banner,
