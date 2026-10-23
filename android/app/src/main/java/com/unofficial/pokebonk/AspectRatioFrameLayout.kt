@@ -5,9 +5,8 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 
 /**
- * Keeps the game WebView inside a centered 16:10 viewport. On wider landscape
- * displays (common on foldables when open), the unused area becomes black
- * letterboxing instead of stretching the game UI.
+ * Optionally keeps the game WebView inside a centered aspect-ratio viewport.
+ * A ratio of 0 fills the available screen.
  */
 class AspectRatioFrameLayout @JvmOverloads constructor(
     context: Context,
@@ -15,7 +14,12 @@ class AspectRatioFrameLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private val targetAspectRatio = 16f / 10f
+    private var targetAspectRatio = 0f
+
+    fun setTargetAspectRatio(aspectRatio: Float) {
+        targetAspectRatio = aspectRatio
+        requestLayout()
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val availableWidth = MeasureSpec.getSize(widthMeasureSpec)
@@ -28,7 +32,10 @@ class AspectRatioFrameLayout @JvmOverloads constructor(
 
         val viewportWidth: Int
         val viewportHeight: Int
-        if (availableWidth.toFloat() / availableHeight > targetAspectRatio) {
+        if (targetAspectRatio <= 0f) {
+            viewportWidth = availableWidth
+            viewportHeight = availableHeight
+        } else if (availableWidth.toFloat() / availableHeight > targetAspectRatio) {
             viewportHeight = availableHeight
             viewportWidth = (availableHeight * targetAspectRatio).toInt()
         } else {
@@ -36,9 +43,10 @@ class AspectRatioFrameLayout @JvmOverloads constructor(
             viewportHeight = (availableWidth / targetAspectRatio).toInt()
         }
 
+        // Keep the outer container full-screen so letterbox space remains black.
         setMeasuredDimension(
-            resolveSize(viewportWidth, widthMeasureSpec),
-            resolveSize(viewportHeight, heightMeasureSpec)
+            resolveSize(availableWidth, widthMeasureSpec),
+            resolveSize(availableHeight, heightMeasureSpec)
         )
 
         val childWidthSpec = MeasureSpec.makeMeasureSpec(viewportWidth, MeasureSpec.EXACTLY)
