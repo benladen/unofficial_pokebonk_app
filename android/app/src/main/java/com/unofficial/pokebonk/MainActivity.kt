@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
         // Expanded foldables and tablets report a sw600dp-class configuration.
         // Conventional phones keep a full-screen viewport in either orientation.
         val isExpandedLargeScreen = resources.configuration.smallestScreenWidthDp >= 600
-        viewport.setTargetAspectRatio(if (isExpandedLargeScreen) 16f / 10f else 0f)
+        viewport.setTargetAspectRatio(if (isExpandedLargeScreen) 16f / 9f else 0f)
     }
 
     private fun sendEscapeKeyToGame() {
