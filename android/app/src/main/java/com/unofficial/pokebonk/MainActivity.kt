@@ -1,5 +1,6 @@
 package com.unofficial.pokebonk
 
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -16,6 +17,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 class MainActivity : ComponentActivity() {
 
     private lateinit var webView: PokeBonkWebView
+    private lateinit var viewport: AspectRatioFrameLayout
     private var lastBackPressTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
         webView = PokeBonkWebView(this)
 
-        val root = AspectRatioFrameLayout(this).apply {
+        viewport = AspectRatioFrameLayout(this).apply {
             setBackgroundColor(android.graphics.Color.BLACK)
             addView(
                 webView,
@@ -45,7 +47,8 @@ class MainActivity : ComponentActivity() {
             )
         }
 
-        setContentView(root)
+        setContentView(viewport)
+        updateViewportAspectRatio()
         webView.loadUrl("https://pokebonk.com")
 
         // Back press handling: first tap sends Escape to game menu, double tap exits
@@ -61,6 +64,18 @@ class MainActivity : ComponentActivity() {
                 }
             }
         })
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateViewportAspectRatio()
+    }
+
+    private fun updateViewportAspectRatio() {
+        // Expanded foldables and tablets report a sw600dp-class configuration.
+        // Conventional phones keep a full-screen viewport in either orientation.
+        val isExpandedLargeScreen = resources.configuration.smallestScreenWidthDp >= 600
+        viewport.setTargetAspectRatio(if (isExpandedLargeScreen) 16f / 10f else 0f)
     }
 
     private fun sendEscapeKeyToGame() {
