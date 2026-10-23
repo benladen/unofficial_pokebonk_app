@@ -1,4 +1,5 @@
 # PokéBonk (Unofficial Native Client)
+PokéBonk 安卓客户端，本质类似浏览器，针对折叠屏手机进行优化，锁定长宽比为16:10。
 
 High-performance native wrappers for **PokéBonk** on **Android**, **Windows**, and **iOS**.
 
