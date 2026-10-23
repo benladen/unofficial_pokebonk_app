@@ -3,6 +3,17 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val releaseKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+val releaseStorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+val releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+val hasReleaseSigning = listOf(
+    releaseKeystorePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "com.unofficial.pokebonk"
     compileSdk = 34
@@ -11,15 +22,34 @@ android {
         applicationId = "com.unofficial.pokebonk"
         minSdk = 26
         targetSdk = 34
-        versionCode = 25
-        versionName = "2.4"
+        versionCode = 20
+        versionName = "2.0"
+    }
+
+    signingConfigs {
+        create("release") {
+            if (hasReleaseSigning) {
+                storeFile = file(releaseKeystorePath!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            // Signs the optimized release build automatically so it installs on any phone
-            signingConfig = signingConfigs.getByName("debug")
+            // GitHub builds must use a persistent private release key. Local builds
+            // can still use the machine's debug key when release secrets are absent.
+            signingConfig = if (hasReleaseSigning) {
+                signingConfigs.getByName("release")
+            } else {
+                if (System.getenv("GITHUB_ACTIONS") == "true") {
+                    error("Android release signing secrets are missing; configure the ANDROID_* GitHub Actions secrets.")
+                }
+                signingConfigs.getByName("debug")
+            }
         }
     }
     compileOptions {
